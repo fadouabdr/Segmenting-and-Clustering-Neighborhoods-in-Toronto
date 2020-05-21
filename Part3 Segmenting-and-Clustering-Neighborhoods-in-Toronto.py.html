@@ -1,0 +1,126 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Segmenting and Clustering Neighborhoods in Toronto Part 3
+
+# ### load libraries
+
+# In[10]:
+
+
+get_ipython().system('pip install geopy')
+
+
+# In[14]:
+
+
+get_ipython().system('pip install folium')
+
+
+# In[20]:
+
+
+import numpy as np # library to handle data in a vectorized manner
+
+import pandas as pd # library for data analsysis
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+
+import json # library to handle JSON files
+
+import geopy # install it in Anaconda Prompt
+from geopy.geocoders import Nominatim # convert an address into latitude and longitude values
+
+import requests # library to handle requests
+from pandas.io.json import json_normalize # tranform JSON file into a pandas dataframe
+
+# Matplotlib and associated plotting modules
+import matplotlib.cm as cm
+import matplotlib.colors as colors
+
+# import k-means from clustering stage
+from sklearn.cluster import KMeans
+
+import folium # map rendering library
+
+from IPython.display import Image # will upload screenshots later
+
+
+# ### Toronto neighborhoods data created in part 2
+
+# In[21]:
+
+
+# Get Toronto neighborhoods data created in part 2
+neighborhoods=pd.read_csv('toronto.csv')
+
+neighborhoods.head()
+
+
+# In[22]:
+
+
+# Restrict to boroughs that contain the word Toronto 
+toronto_data=neighborhoods[neighborhoods.Borough.str.contains('Toronto')]
+
+# The first five rows of the data frame
+toronto_data.head()
+
+
+# In[23]:
+
+
+# Check the shape
+toronto_data.shape
+
+
+# ### Use geopy library to get the latitude and longitude values of Toronto
+
+# In[24]:
+
+
+address = 'Toronto'
+
+geolocator = Nominatim(user_agent="trt_explorer")
+location = geolocator.geocode(address)
+latitude = location.latitude
+longitude = location.longitude
+print('The geograpical coordinate of Toronto are {}, {}.'.format(latitude, longitude))
+
+
+# ### Create a map of Toronto
+
+# In[37]:
+
+
+# create map of Manhattan using latitude and longitude values
+map_toronto = folium.Map(location=[latitude, longitude], zoom_start=11)
+
+# add markers to map
+for lat, lng, label in zip(toronto_data['Latitude'], toronto_data['Longitude'], toronto_data['Neighborhood']):
+    label = folium.Popup(label, parse_html=True)
+    folium.CircleMarker(
+        [lat, lng],
+        radius=5,
+        popup=label,
+        color='blue',
+        fill=True,
+        fill_color='#3186cc',
+        fill_opacity=0.7,
+        parse_html=False).add_to(map_toronto)  
+    
+map_toronto
+
+
+# In[36]:
+
+
+from IPython.display import Image
+Image("/Users/macdmin/Public/map.png")
+
+
+# In[ ]:
+
+
+
+
